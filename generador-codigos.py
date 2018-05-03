@@ -1,8 +1,9 @@
 import sys
 import xlrd
 
-values = "values ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')"
-query_string = "INSERT INTO {table} (d_codigo,d_asenta,d_tipo_asenta,D_mnpio,d_estado,d_ciudad,d_CP,c_estado,c_oficina,c_CP,c_tipo_asenta,c_mnpio,id_asenta_cpcons,d_zona,c_cve_ciudad)"
+values = "values ('{}','{}','{}','{}','{}')"
+query_string = "INSERT INTO {table} (neighborhood, district, state, city, zip_code)"
+positions = [1,3,4,5,0]
 
 def one_file(book, insert):
     sheet_names = book.sheet_names()
@@ -15,8 +16,11 @@ def one_file(book, insert):
         sheet = book.sheet_by_name(name)
         file.write('\n\n-- Codigos postales para {}\n\n'.format(name))
         for index in range(sheet.nrows):
+            if index is 0:
+                continue
             row = sheet.row(index)
-            inserted_values = values.format( *( str(cell.value) for cell in row ) )
+            required_data = [row[i] for i in positions]
+            inserted_values = values.format( *( str(cell.value) for cell in required_data ) )
             query = "{} {};\n".format(insert, inserted_values)
             file.write(query)
 
